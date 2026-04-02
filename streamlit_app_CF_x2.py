@@ -5,15 +5,24 @@ import altair as alt
 
 st.set_page_config(page_title="DCF Assumptions Sandbox", layout="centered")
 
-DISCOUNT_RATE = 0.10
+DISCOUNT_RATE = 0.20
 LINE_COLOR = "#AF1A1D"  # RGB (175, 26, 29)
+
+# ---------- Instructions ----------
+st.markdown("""
+### How to use this tool
+- Choose one of the four Dell case scenarios from the drop-down menu.
+- Edit any of the yearly cash flows in the input fields if desired.
+- The chart updates automatically based on your inputs.
+- The valuation updates automatically and is displayed below the chart.
+""")
 
 # ---------- Preset scenarios ----------
 SCENARIOS = {
-    "Advisor Base": [2.76, 3.15, 3.53, 3.90, 4.14],
-    "Advisor Case 1": [3.85, 3.36, 3.28, 3.17, 2.98],
-    "Advisor Case 2": [3.85, 3.44, 3.70, 4.01, 3.82],
-    "Bank Base": [3.85, 3.61, 4.54, 5.69, 5.50],
+    "Advisor Base": [2760, 3150, 3530, 3900, 4140],
+    "Advisor Case 1": [3850, 3360, 3280, 3170, 2980],
+    "Advisor Case 2": [3850, 3440, 3700, 4010, 3820],
+    "Bank Base": [3850, 3610, 4540, 5690, 5500],
 }
 
 years = [1, 2, 3, 4, 5]
@@ -44,19 +53,19 @@ col1, col2 = st.columns(2)
 
 with col1:
     st.session_state.cf_values[0] = st.number_input(
-        "Cash flow year 1 (mUSD)",
+        "Cash flow year 1 (thousand USD)",
         value=float(st.session_state.cf_values[0]),
         step=1.0,
         format="%.2f"
     )
     st.session_state.cf_values[1] = st.number_input(
-        "Cash flow year 2 (mUSD)",
+        "Cash flow year 2 (thousand USD)",
         value=float(st.session_state.cf_values[1]),
         step=1.0,
         format="%.2f"
     )
     st.session_state.cf_values[2] = st.number_input(
-        "Cash flow year 3 (mUSD)",
+        "Cash flow year 3 (thousand USD)",
         value=float(st.session_state.cf_values[2]),
         step=1.0,
         format="%.2f"
@@ -64,13 +73,13 @@ with col1:
 
 with col2:
     st.session_state.cf_values[3] = st.number_input(
-        "Cash flow year 4 (mUSD)",
+        "Cash flow year 4 (thousand USD)",
         value=float(st.session_state.cf_values[3]),
         step=1.0,
         format="%.2f"
     )
     st.session_state.cf_values[4] = st.number_input(
-        "Cash flow year 5 (mUSD)",
+        "Cash flow year 5 (thousand USD)",
         value=float(st.session_state.cf_values[4]),
         step=1.0,
         format="%.2f"
@@ -89,20 +98,20 @@ df = pd.DataFrame(
 # ---------- Chart ----------
 st.subheader("Cash flow profile")
 
-line = (
+bars = (
     alt.Chart(df)
-    .mark_line(point=True, strokeWidth=3, color=LINE_COLOR)
+    .mark_bar(color=LINE_COLOR)
     .encode(
         x=alt.X("Year:O", title="Year", axis=alt.Axis(labelAngle=0)),
-        y=alt.Y("Cash flow:Q", title="Cash flow (mUSD)"),
+        y=alt.Y("Cash flow:Q", title="Cash flow (thousand USD)"),
         tooltip=[
             alt.Tooltip("Year:O", title="Year"),
-            alt.Tooltip("Cash flow:Q", title="Cash flow (mUSD)", format=",.2f"),
+            alt.Tooltip("Cash flow:Q", title="Cash flow (thousand USD)", format=",.2f"),
         ],
     )
 )
 
-st.altair_chart(line, use_container_width=True)
+st.altair_chart(bars, use_container_width=True)
 
 # ---------- Valuation ----------
 present_values = [
@@ -113,4 +122,4 @@ present_values = [
 valuation = sum(present_values)
 
 st.subheader("Valuation")
-st.metric("Valuation", f"USD {valuation:,.0f}m")
+st.metric("Valuation", f"USD {valuation:,.0f}k")
